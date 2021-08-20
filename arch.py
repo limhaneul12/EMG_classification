@@ -1,18 +1,14 @@
 import numpy as np
 import tensorflow as tf
+
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.layers import GRU, LSTM, Reshape, Input
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, BatchNormalization
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.datasets import mnist
+from emg_load_data import load_data
 """
-data = np.load('test_imgae_data.npy', allow_pickle=True)
-
-(X_train, y_train), (X_test, y_test) = data
-X_train = np.array(X_train)
-y_train = np.array(y_train)
-X_test = np.array(X_test)
-y_test = np.array(y_test)
+(X_train, y_train), (X_test, y_test) = load_data()
 """
 tf.random.set_seed(0)
 np.random.seed(0)
@@ -76,13 +72,13 @@ def lstm_modeling():
     k_model.fit(X_train, y_train, epochs=300, batch_size=128, validation_data=(X_test, y_test))
     print(k_model.evaluate(X_test, y_test))
 
-    xhat_idx = np.random.choice(X_test.shape[0], 10)
+    xhat_idx = np.random.choice(X_test.shape[0], 60000)
     xhat = X_test[xhat_idx]
     yhat = k_model.predict(xhat)
 
     result = 0
     loss = 0
-    for i in range(5):
+    for i in range(60000):
         print('True : ' + str(np.argmax(y_test[xhat_idx[i]])) + ', Predict : ' + str(yhat[i]))
         if str(np.argmax(X_test[xhat_idx[i]])) == str(yhat[i]):
             result += 1
