@@ -101,7 +101,8 @@ def lstm_modeling():
 # cnn1 cnn 2 lstm
 def data_concatnate():
     model_concat = tf.keras.layers.concatenate([cnn_2d(), con_2d_2(), lstm_modeling()])
-    k_model = tf.keras.models.Model(input_shape, model_concat)
+    finally_dense = (Dense(10, activation='softmax'))(model_concat)
+    k_model = tf.keras.models.Model(input_shape, finally_dense)
     tf.keras.utils.plot_model(k_model, 'modeling_data.png', show_shapes=True)
     k_model.summary()
     return k_model
