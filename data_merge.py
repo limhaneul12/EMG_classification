@@ -76,5 +76,4 @@ def image_visualization():
             plt.show()
 
 
-
 image_visualization()

@@ -35,11 +35,12 @@ X_test = np.reshape(X_test, (len(X_test), 28, 28, 1))  # 'channels_firtst'이미
 y_train = to_categorical(y_train, 10)
 y_test = to_categorical(y_test, 10)
 
+# input data shape
 input_shape = Input(shape=[X_train.shape[1], X_train.shape[2], X_train.shape[3]])
 
 
 # 범용 활성화함수
-# activation 입니다 False 라고 한 이유는 각 activation function 쓰임새가 달라서 지정해놧어요
+# activation 입니다 False 라고 한 이유는 각 activation function parameter False 는 사용안함 True 하면 사용
 def activation_optional(input_size, alpha=0.2, leaky_relu=False, relu=False):
     norm = tf.keras.layers.BatchNormalization()(input_size)
     if leaky_relu or alpha:  # leaky_relu 나 alpha 값이 일치하면 실행
@@ -98,7 +99,7 @@ def lstm_modeling():
 
     return flatten
 
-# cnn1 cnn 2 lstm
+# cnn1 cnn 2 lstm concatnate
 def data_concatnate():
     model_concat = tf.keras.layers.concatenate([cnn_2d(), con_2d_2(), lstm_modeling()])
     finally_dense = (Dense(10, activation='softmax'))(model_concat)
@@ -116,7 +117,7 @@ def model_fitting():
     callback = tf.keras.callbacks.EarlyStopping(monitor='val_acc', patience=10, restore_best_weights=True)
     k_model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=['acc'])
     # modeling fitting
-    history = k_model.fit(X_train, y_train, epochs=300, batch_size=128, validation_data=(X_test, y_test),
+    history = k_model.fit(X_train, y_train, epochs=50, batch_size=128, validation_data=(X_test, y_test),
                           verbose=1, callbacks=[callback])
     score, acc = k_model.evaluate(X_test, y_test, batch_size=128, verbose=1)
 
