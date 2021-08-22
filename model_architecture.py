@@ -40,7 +40,7 @@ y_train = to_categorical(y_train, 10)
 y_test = to_categorical(y_test, 10)
 
 epochs = 100
-batch_size = 1
+batch_size = 128
 learning_rate = 1e-3
 num_classes = 10
 
