@@ -201,8 +201,28 @@ def model_fitting():
         plt.tight_layout()
         plt.show()
 
+    def classes_predict():
+        x_hat_idx = np.random.choice(X_train.shape[0], 60000)
+        x_hat = X_train[x_hat_idx]
+
+        prediction_result = k_model.predict(x_hat)
+        prediction_labels = np.argmax(prediction_result, axis=-1)
+        test_label = np.argmax(y_test, axis=-1)
+
+        result = 0
+        loss = 0
+        for i in range(60000):
+            if str(prediction_labels) == str(test_label):
+                result += 1
+            else:
+                loss += 1
+
+        print("result > {}".format(result))
+        print("loss > {}".format(loss))
+
     visualization()
     prediction_data()
+    classes_predict()
 
 
 model_fitting()
