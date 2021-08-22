@@ -13,6 +13,7 @@ from tensorflow.keras.datasets import mnist
 
 from confusion_shared import print_confusion_matrix_v2
 from confusion_shared import logw
+
 """
 from emg_load_data import load_data
 # signal dataset
@@ -40,9 +41,15 @@ y_train = to_categorical(y_train, 10)
 y_test = to_categorical(y_test, 10)
 
 epochs = 100
-batch_size = 128
+batch_size = 1
 learning_rate = 1e-3
-num_classes = 10
+
+fnpath = 'result/'
+try:
+    os.mkdir(fnpath)
+except OSError as e:
+    print(f'An error has occurred. Continuing anyway: {e}')
+
 
 def image_show(n, image_size=256):
     image = X_train[n]
@@ -56,9 +63,7 @@ def image_show(n, image_size=256):
 
 # input data shape
 input_shape = Input(shape=[X_train.shape[1], X_train.shape[2], X_train.shape[3]])
-
 activate_leaky_relu = tf.keras.layers.LeakyReLU()
-
 
 # 범용 활성화함수
 # activation 입니다 False 라고 한 이유는 각 activation function parameter False 는 사용안함 True 하면 사용
@@ -129,10 +134,11 @@ def lstm_modeling():
 # cnn1 cnn 2 lstm concatnate
 def data_concatnate():
     model_concat = tf.keras.layers.concatenate([cnn_model_arch1(), cnn_model_arch2(), lstm_modeling()])
-    finally_dense = (Dense(num_classes, activation='softmax'))(model_concat)
+    finally_dense = (Dense(8, activation='softmax'))(model_concat)
     k_model = tf.keras.models.Model(input_shape, finally_dense)
     tf.keras.utils.plot_model(k_model, 'modeling_data_64_32_batch_drop.png', show_shapes=True)
     k_model.summary()
+
     return k_model
 
 
@@ -147,8 +153,13 @@ def model_fitting():
     history = k_model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size,
                           validation_data=(X_test, y_test),
                           verbose=1, callbacks=[callback])
-    print(k_model.save('test_cnn_32_batch_dropout.h5'))
+    print(k_model.save('test_cnn_64_batch_dropout.h5'))
     score, acc = k_model.evaluate(X_test, y_test, batch_size=128, verbose=1)
+
+    # prediction model
+    prediction_result = k_model.predict(X_test)
+    prediction_labels = np.argmax(prediction_result, axis=-1)
+    test_label = np.argmax(y_test, axis=-1)
 
     # model training graph visualization
     def visualization():
@@ -171,26 +182,17 @@ def model_fitting():
 
         plt.show()
 
-
-    # 건들지 마세요 model image classification test
-    def prediction_data():
-        prediction_result = k_model.predict(X_test)
-        prediction_labels = np.argmax(prediction_result, axis=-1)
-        test_label = np.argmax(y_test, axis=-1)
-
-        fnpath = 'result/'
-        try:
-            os.mkdir(fnpath)
-        except OSError as e:
-            print(f'An error has occurred. Continuing anyway: {e}')
-
-        filename = f'{os.getcwd()}/classification_output.txt'
+    # confusion matrix making text file 
+    def print_matrix():
+        filename = f'{os.getcwd()}/result/classification_output.txt'
         file = open(filename, 'a+')
         logw(file, 'result -> {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
-
         confusion = print_confusion_matrix_v2(prediction_result, y_test)
         logw(file, f'Model Test loss -> {score} , Model Test accuracy -> {acc}')
         logw(file, f'Confusion Matrix -> \n' + np.array2string(confusion))
+
+    # 건들지 마세요 model image classification test
+    def prediction_data():
         wrong_result = []
         for n in range(0, len(test_label)):
             if prediction_labels[n] == test_label[n]:
@@ -206,30 +208,20 @@ def model_fitting():
             plt.imshow(X_test[n].reshape(28, 28), cmap="Greys", interpolation="nearest")
             tmp = "Label:" + str(test_label[n]) + ", Prediction:" + str(prediction_labels[n])
             plt.title(tmp)
-
         plt.tight_layout()
         plt.show()
 
     def classes_predict():
-        x_hat_idx = np.random.choice(X_train.shape[0], 60000)
-        x_hat = X_train[x_hat_idx]
-
-        prediction_result = k_model.predict(x_hat)
-        prediction_labels = np.argmax(prediction_result, axis=-1)
-        test_label = np.argmax(y_test, axis=-1)
-
         result = 0
         loss = 0
-        for i in range(60000):
-            if str(prediction_labels) == str(test_label):
+        for n in range(0, len(test_label)):
+            if prediction_labels[n] == test_label[n]:
                 result += 1
-            else:
+            elif prediction_labels[n] != test_label[n]:
                 loss += 1
 
-        print("result > {}".format(result))
-        print("loss > {}".format(loss))
-
     visualization()
+    print_matrix()
     prediction_data()
     classes_predict()
 
