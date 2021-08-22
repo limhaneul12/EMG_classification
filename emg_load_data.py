@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-def load_data(file='test_image_data.npz'):
+def load_data(file='test_image_data1.npz'):
     root_location = os.getcwd()
     path = f'{root_location}/{file}'
     with np.load(path, allow_pickle=True) as f:
@@ -10,3 +10,5 @@ def load_data(file='test_image_data.npz'):
 
         return (x_train, y_train), (x_test, y_test)
 
+
+(x_train, y_train), (x_test, y_test) = load_data()
