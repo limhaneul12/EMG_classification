@@ -151,17 +151,25 @@ def model_fitting():
 
     # model training graph visualization
     def visualization():
-        acc1 = history.history["acc"]
-        loss = history.history["loss"]
+        fig, loss_ax = plt.subplots()
 
-        val_acc = history.history["val_acc"]
-        val_loss = history.history["val_loss"]
+        acc_ax = loss_ax.twinx()
 
-        plt.plot(acc1, val_acc, "*--", label="acc")
-        plt.plot(loss, val_loss, "^--", label="loss")
+        loss_ax.plot(history.history['loss'], 'y', label='train loss')
+        loss_ax.plot(history.history['val_loss'], 'r', label='val loss')
 
-        plt.legend(loc="best")
+        acc_ax.plot(history.history['acc'], 'b', label='train acc')
+        acc_ax.plot(history.history['val_acc'], 'g', label='val acc')
+
+        loss_ax.set_xlabel('epoch')
+        loss_ax.set_ylabel('loss')
+        acc_ax.set_ylabel('accuray')
+
+        loss_ax.legend(loc='upper left')
+        acc_ax.legend(loc='lower left')
+
         plt.show()
+
 
     # 건들지 마세요 model image classification test
     def prediction_data():
