@@ -42,6 +42,7 @@ y_test = to_categorical(y_test, 10)
 epochs = 100
 batch_size = 1
 learning_rate = 1e-3
+num_classes = 10
 
 def image_show(n, image_size=256):
     image = X_train[n]
@@ -128,7 +129,7 @@ def lstm_modeling():
 # cnn1 cnn 2 lstm concatnate
 def data_concatnate():
     model_concat = tf.keras.layers.concatenate([cnn_model_arch1(), cnn_model_arch2(), lstm_modeling()])
-    finally_dense = (Dense(8, activation='softmax'))(model_concat)
+    finally_dense = (Dense(num_classes, activation='softmax'))(model_concat)
     k_model = tf.keras.models.Model(input_shape, finally_dense)
     tf.keras.utils.plot_model(k_model, 'modeling_data_64_32_batch_drop.png', show_shapes=True)
     k_model.summary()
