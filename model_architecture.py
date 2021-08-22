@@ -33,7 +33,6 @@ X_train = np.reshape(X_train, (len(X_train), 28, 28, 1))  # 'channels_firtst'이
 X_test = np.reshape(X_test, (len(X_test), 28, 28, 1))  # 'channels_firtst'이미지 데이터 형식을 사용하는 경우 이를 적용
 print(f"Shape checking X_train image: {X_train.shape}")
 print(f"Shape checking X_test image: {X_test.shape}")
-print(X_train)
 
 # 라벨링 mnist 는 0~9 총 10개
 y_train = to_categorical(y_train, 10)
