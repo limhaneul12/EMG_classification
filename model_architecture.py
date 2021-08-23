@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Flatten, Dropout
-from tensorflow.keras.layers import LSTM, Reshape, Input, Activation
+from tensorflow.keras.layers import LSTM, Reshape, Input
 from tensorflow.keras.layers import Conv2D, BatchNormalization
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.datasets import mnist
@@ -32,29 +32,33 @@ X_train = X_train.astype('float32') / 255.
 X_test = X_test.astype('float32') / 255.
 X_train = np.reshape(X_train, (len(X_train), 28, 28, 1))  # 'channels_firtst'이미지 데이터 형식을 사용하는 경우 이를 적용
 X_test = np.reshape(X_test, (len(X_test), 28, 28, 1))  # 'channels_firtst'이미지 데이터 형식을 사용하는 경우 이를 적용
-print(f"Shape checking X_train image: {X_train.shape}")
-print(f"Shape checking X_test image: {X_test.shape}")
-print(X_train)
 
 # 라벨링 mnist 는 0~9 총 10개
 y_train = to_categorical(y_train, 10)
 y_test = to_categorical(y_test, 10)
 
 epochs = 100
-batch_size = 1
+batch_size = 128
 learning_rate = 1e-3
 
+# file directory creat in file name is result
 fnpath = 'result/'
 try:
     os.mkdir(fnpath)
 except OSError as e:
     print(f'An error has occurred. Continuing anyway: {e}')
 
+# file create location
+filename = f'{os.getcwd()}/result/classification_output.txt'
+file = open(filename, 'a+')
+
+logw(file, f'Shape checking X_test image: {X_test.shape}')
+logw(file, f'Shape checking X_train image: {X_train.shape}')
 
 def image_show(n, image_size=256):
     image = X_train[n]
     image_reshaped = image.reshape(image_size, image_size)
-    label = X_train[n]
+    label = y_train[n]
     plt.figure(figsize=(4, 4))
     plt.title("sample of " + str(label))
     plt.imshow(image_reshaped, cmap="gray")
@@ -64,6 +68,7 @@ def image_show(n, image_size=256):
 # input data shape
 input_shape = Input(shape=[X_train.shape[1], X_train.shape[2], X_train.shape[3]])
 activate_leaky_relu = tf.keras.layers.LeakyReLU()
+
 
 # 범용 활성화함수
 # activation 입니다 False 라고 한 이유는 각 activation function parameter False 는 사용안함 True 하면 사용
@@ -134,7 +139,7 @@ def lstm_modeling():
 # cnn1 cnn 2 lstm concatnate
 def data_concatnate():
     model_concat = tf.keras.layers.concatenate([cnn_model_arch1(), cnn_model_arch2(), lstm_modeling()])
-    finally_dense = (Dense(8, activation='softmax'))(model_concat)
+    finally_dense = (Dense(10, activation='softmax'))(model_concat)
     k_model = tf.keras.models.Model(input_shape, finally_dense)
     tf.keras.utils.plot_model(k_model, 'modeling_data_64_32_batch_drop.png', show_shapes=True)
     k_model.summary()
@@ -184,8 +189,6 @@ def model_fitting():
 
     # confusion matrix making text file
     def print_matrix():
-        filename = f'{os.getcwd()}/result/classification_output.txt'
-        file = open(filename, 'a+')
         logw(file, 'result -> {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
         confusion = print_confusion_matrix_v2(prediction_result, y_test)
         logw(file, f'Model Test loss -> {score} , Model Test accuracy -> {acc}')
@@ -198,10 +201,11 @@ def model_fitting():
             if prediction_labels[n] == test_label[n]:
                 wrong_result.append(n)
 
-        sample = random.choices(population=wrong_result, k=16)
+        # 16개 임의로 선택
+        sample = random.choices(population=wrong_result, k=25)
         count = 0
-        nrows = ncols = 4
-        plt.figure(figsize=(12, 8))
+        nrows = ncols = 5
+        plt.figure(figsize=(20, 8))
         for n in sample:
             count += 1
             plt.subplot(nrows, ncols, count)
@@ -219,6 +223,7 @@ def model_fitting():
                 result += 1
             elif prediction_labels[n] != test_label[n]:
                 loss += 1
+        logw(file, f'Model classification result -> {result} ||| Model classification loss -> {loss}')
 
     visualization()
     print_matrix()
