@@ -52,6 +52,7 @@ except OSError as e:
 filename = f'{os.getcwd()}/result/classification_output.txt'
 file = open(filename, 'a+')
 
+logw(file, 'start -> {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 logw(file, f'Shape checking X_test image: {X_test.shape}')
 logw(file, f'Shape checking X_train image: {X_train.shape}')
 
@@ -158,7 +159,7 @@ def model_fitting():
     history = k_model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size,
                           validation_data=(X_test, y_test),
                           verbose=1, callbacks=[callback])
-    print(k_model.save('test_cnn_64_batch_dropout.h5'))
+    print(k_model.save('cnn_64_batch_dropout.h5'))
     score, acc = k_model.evaluate(X_test, y_test, batch_size=128, verbose=1)
 
     # prediction model
@@ -189,7 +190,6 @@ def model_fitting():
 
     # confusion matrix making text file
     def print_matrix():
-        logw(file, 'result -> {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
         confusion = print_confusion_matrix_v2(prediction_result, y_test)
         logw(file, f'Model Test loss -> {score} , Model Test accuracy -> {acc}')
         logw(file, f'Confusion Matrix -> \n' + np.array2string(confusion))
