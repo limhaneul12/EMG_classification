@@ -1,0 +1,99 @@
+import os
+import pandas as pd
+
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import sklearn.model_selection
+from PIL import Image
+
+
+def crate_image_data():
+    # 그냥 임시로 해논거 바꿔야하는거 맞음 높이 너비
+    w = 256
+    h = 256
+    folder = './img_direct/'
+    """
+    image dataset 만들때는 폴더 하나가 label 하나라고 보면 됨 
+    이걸 보면 내 컴퓨터에는 Box_holding 이라는 폴더가 label 이다 라고 보면됨 
+    그러면 총 8개의 label 이 있다 라고 보면 되는것!
+    """
+    # data labeling
+    categorical = ['Box_holding', 'Eating', 'Erasing-writing', 'Lifting_up_and_down',
+                   'Light_bulb', 'Open-close-door', 'Reaching_out_and_retracting', 'Smart_phone_check']
+    num_classes = len(categorical)  # 총 갯수
+    x = []
+    y = []
+
+    for index, categorical in enumerate(categorical):
+        label = [0 for _ in range(num_classes)]
+        label[index] = 1
+        dir_ = f'{folder + categorical}/'
+
+        for top, dir1, f in os.walk(dir_):
+            for filename in f:
+                print(dir_ + filename)
+                img = Image.open(dir_ + filename).convert('L')
+                img = np.array(img, 'uint8')
+                print(img)
+                """
+                image 읽어서 resize 화 
+                """
+                img = cv2.resize(img, None, fx=w / img.shape[1], fy=h / img.shape[0])
+                print(np.array(img).shape)
+                x.append(img)  # 정규화 를 미리 해줫음 픽셀은 0~ 255 값인데 학습하기 위해서 0 ~ 1 사이 소수로 바꿈
+                y.append(label)
+
+    x = np.array(x)
+    y = np.array(y)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y)
+    np.savez('test_image_data1.npz', x_train=X_train, x_test=X_test, y_train=y_train, y_test=y_test)
+    print('done!')
+
+"""
+경로를 자기 directory file 위치에 맞춰서 경로를 설정해줄것 
+ex) /home/lmsky/PycharmProjects/torch_practice/data_time/Box_holding.csv 로 가고싶을때 
+main_root = /home/lmsky/PycharmProjects/torch_practice/
+file = data_time/
+os.chdir(file)  # file(data_time)이라는 directory 안쪽으로 접근  
+path = f'{main_root}{file}' 
+"""
+
+
+def image_visualization():
+    """
+    컴퓨터 마다 경로가 달라서 꼭 경로 자기 경로 로 바꿔주세요
+    """
+    # 최상단 위치
+    main_root = '/home/lmsky/PycharmProjects/torch_practice/'
+    # 하위 위치
+    file = 'data_preprocessing/210814_emg_training_session/'
+    os.chdir(file)
+    # 현재 디렉토리 파일 list 형태로 보여줌
+    location = os.getcwd()
+    # 현재 디렉토리 파일 하위 폴더 위치 보여줌
+    root = os.listdir(location)
+    root.sort()
+    for i in root:
+        # 파일 루트 설정
+        path_folder = f'{main_root}{file}{i}/1st/'
+        # 이미지 저장할 루트 설정
+        path_folder2 = f'{main_root}img_direct/{i}/'
+        #  path_folder file list 형태로 보여줌
+        root_data = os.listdir(path_folder)
+        root_data.sort()  # 정렬
+        for j in root_data:
+            a = pd.read_csv(path_folder + j)
+            col = a.columns
+
+
+            plt.plot(a[col[0]], a[col[1]], c='white')
+            # 경고 무시해도됨
+            plt.axes().get_xaxis().set_visible(False)
+            plt.axes().get_yaxis().set_visible(False)
+            plt.axis('off')
+            plt.savefig(f'{path_folder2}/{i}__{j}.png', facecolor='black')
+            plt.show()
+
+
+crate_image_data()

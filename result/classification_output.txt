@@ -1,0 +1,16 @@
+start -> 2021-08-23 10:17:22
+Shape checking X_test image: (10000, 28, 28, 1)
+Shape checking X_train image: (60000, 28, 28, 1)
+Model Test loss -> 0.026668347418308258 , Model Test accuracy -> 0.9929999709129333
+Confusion Matrix -> 
+[[ 972    0    1    0    0    2    4    1    0    0]
+ [   4 1127    0    1    0    0    1    0    2    0]
+ [   1    0 1025    0    0    0    1    5    0    0]
+ [   0    1    0 1007    0    1    0    1    0    0]
+ [   0    0    0    0  977    0    3    0    0    2]
+ [   0    0    0    4    0  885    2    0    0    1]
+ [   1    1    0    1    0    1  954    0    0    0]
+ [   0    3    3    0    1    0    0 1017    1    3]
+ [   2    0    1    1    0    0    1    1  967    1]
+ [   0    0    0    0    4    1    1    2    2  999]]
+Model classification result -> 9930 ||| Model classification loss -> 70
